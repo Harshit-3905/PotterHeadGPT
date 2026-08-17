@@ -176,12 +176,9 @@ describe("ingestPreparedBook", () => {
     expect(result).toMatchObject({ status: "inserted", chunks: 2 });
     expect(memory.documents.size).toBe(1);
     expect(memory.points).toHaveLength(2);
-    expect(memory.embedded[0]).toContain(
-      "The Lantern Academy — The Moonstone Key",
-    );
-    expect(memory.points[0]?.payload.content).not.toContain(
-      "The Lantern Academy —",
-    );
+    expect(memory.embedded[0]).toBe(memory.points[0]?.payload.content);
+    expect(memory.embedded[0]).toContain("moonstone key");
+    expect(memory.embedded[0]).not.toContain("The Lantern Academy —");
     expect(memory.points[0]?.payload.chapter).toBe("The Moonstone Key");
     expect(memory.points[0]?.vector).toHaveLength(1536);
   });

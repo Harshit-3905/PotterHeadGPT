@@ -1,4 +1,4 @@
-import { DOCUMENT_ID_PAYLOAD_KEY } from "./collections";
+import { DOCUMENT_ID_PAYLOAD_KEY, QDRANT_VECTOR_SIZE } from "./collections";
 
 export const UPSERT_BATCH_SIZE = 64;
 
@@ -14,6 +14,12 @@ export type ChunkPayload = {
 export type ChunkPoint = {
   id: string;
   vector: number[];
+  payload: ChunkPayload;
+};
+
+export type ScoredChunkHit = {
+  id: string;
+  score: number;
   payload: ChunkPayload;
 };
 
@@ -38,6 +44,23 @@ export type QdrantPointsClient = {
       };
     },
   ) => Promise<unknown>;
+};
+
+export type QdrantQueryClient = {
+  query: (
+    collection: string,
+    args: {
+      query: number[];
+      limit: number;
+      with_payload: true;
+    },
+  ) => Promise<{
+    points: Array<{
+      id: string | number;
+      score: number;
+      payload?: Record<string, unknown> | null;
+    }>;
+  }>;
 };
 
 export async function upsertChunks(
@@ -68,5 +91,62 @@ export async function deleteChunksByDocumentId(
     filter: {
       must: [{ key: DOCUMENT_ID_PAYLOAD_KEY, match: { value: documentId } }],
     },
+  });
+}
+
+export function assertQueryVector(vector: number[]): void {
+  if (
+    vector.length !== QDRANT_VECTOR_SIZE ||
+    vector.some((value) => !Number.isFinite(value))
+  ) {
+    throw new Error("Query vector must contain 1536 finite numbers");
+  }
+}
+
+function asChunkPayload(
+  payload: Record<string, unknown> | null | undefined,
+): ChunkPayload | null {
+  if (!payload) {
+    return null;
+  }
+  if (typeof payload.content !== "string" || typeof payload.book !== "string") {
+    return null;
+  }
+  return {
+    content: payload.content,
+    documentId: typeof payload.documentId === "string" ? payload.documentId : "",
+    chunkIndex:
+      typeof payload.chunkIndex === "number" ? payload.chunkIndex : 0,
+    book: payload.book,
+    chapter: typeof payload.chapter === "string" ? payload.chapter : null,
+    page: typeof payload.page === "number" ? payload.page : null,
+  };
+}
+
+export async function searchChunks(
+  client: QdrantQueryClient,
+  collection: string,
+  vector: number[],
+  limit: number,
+): Promise<ScoredChunkHit[]> {
+  assertQueryVector(vector);
+  const result = await client.query(collection, {
+    query: vector,
+    limit,
+    with_payload: true,
+  });
+
+  return result.points.flatMap((point) => {
+    const payload = asChunkPayload(point.payload);
+    if (!payload) {
+      return [];
+    }
+    return [
+      {
+        id: String(point.id),
+        score: point.score,
+        payload,
+      },
+    ];
   });
 }

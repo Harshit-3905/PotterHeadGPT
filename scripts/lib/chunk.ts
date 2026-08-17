@@ -13,8 +13,8 @@ const splitter = new RecursiveCharacterTextSplitter({
   separators: [...CHUNK_SEPARATORS],
 });
 
-export function buildEmbedInput(book: string, chapter: string, content: string): string {
-  return `${book} — ${chapter}\n\n${content}`;
+export function buildEmbedInput(content: string): string {
+  return content;
 }
 
 export async function splitChapterChunks(
@@ -32,7 +32,7 @@ export async function splitChapterChunks(
       }
       chunks.push({
         content: trimmed,
-        embedInput: buildEmbedInput(book, chapter.title, trimmed),
+        embedInput: buildEmbedInput(trimmed),
         book,
         chapter: chapter.title,
         page: chapter.startPage,
