@@ -26,6 +26,7 @@
     "@langchain/openai": "^1.5.8",
     "@langchain/textsplitters": "^1.0.1",
     "@qdrant/js-client-rest": "^1.19.0",
+    "@vercel/analytics": "^2.0.1",
     "drizzle-orm": "^0.45.2",
     "jose": "^6.2.9",
     "langsmith": "^0.8.11",
