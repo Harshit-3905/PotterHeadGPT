@@ -1,26 +1,92 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Candlelit library: warm near-black ink, parchment text, gilt accents. */
+  --background: #0b0a09;
+  --background-raised: #14120f;
+  --edge: #2a2219;
+  --foreground: #efe6d6;
+  --foreground-dim: #a89c86;
+  --gold: #c9a86a;
+  --gold-bright: #e8cd94;
+  --gold-deep: #8a6d33;
 }
 
 @theme inline {
+  --color-ink: var(--background);
+  --color-ink-raised: var(--background-raised);
+  --color-ink-edge: var(--edge);
+  --color-parchment: var(--foreground);
+  --color-parchment-dim: var(--foreground-dim);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-deep: var(--gold-deep);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-cormorant);
+
+  --animate-rise: rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
+html {
+  color-scheme: dark;
+}
+
 body {
-  background: var(--background);
+  background-color: var(--background);
+  /* Two light sources: a candle above the page and embers in the far corner. */
+  background-image:
+    radial-gradient(
+      120% 70% at 50% -12%,
+      rgba(201, 168, 106, 0.16),
+      transparent 62%
+    ),
+    radial-gradient(
+      70% 55% at 88% 112%,
+      rgba(138, 109, 51, 0.12),
+      transparent 66%
+    );
+  background-attachment: fixed;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Paper tooth, so the flat panels read as pages rather than screens. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(239, 230, 214, 0.035) 0 1px,
+    transparent 1px 4px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
