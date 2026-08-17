@@ -1,6 +1,8 @@
+import { traceable } from "langsmith/traceable";
 import type { TopicClassifier } from "./types";
+import { questionOnlyInputs } from "./tracing";
 
-export async function classifyTopic(
+async function classifyTopicUntraced(
   question: string,
   classifier: TopicClassifier,
 ): Promise<"harry_potter" | "other"> {
@@ -10,6 +12,12 @@ export async function classifyTopic(
   }
   return result.allow ? "harry_potter" : "other";
 }
+
+export const classifyTopic = traceable(classifyTopicUntraced, {
+  name: "topic_guard",
+  run_type: "chain",
+  processInputs: questionOnlyInputs,
+});
 
 export const TOPIC_GUARD_SYSTEM = `You classify user questions for PotterHeadGPT.
 Allow questions about the Harry Potter books: plot, characters, magic, places, and the book world.

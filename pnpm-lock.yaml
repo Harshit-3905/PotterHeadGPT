@@ -29,6 +29,9 @@ importers:
       jose:
         specifier: ^6.2.9
         version: 6.2.9
+      langsmith:
+        specifier: ^0.8.11
+        version: 0.8.11(openai@6.49.0(zod@4.4.3))
       next:
         specifier: 16.3.1
         version: 16.3.1(@babel/core@7.29.7(supports-color@7.2.0))(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)

@@ -1,4 +1,5 @@
 import type { BaseMessage } from "@langchain/core/messages";
+import { getCurrentRunTree, traceable } from "langsmith/traceable";
 import {
   buildCitationPayload,
   extractCitationOrdinals,
@@ -6,6 +7,11 @@ import {
 } from "./citations";
 import { BOOKS_REFUSAL, OFF_TOPIC_REFUSAL } from "./copy";
 import { buildGroundedPrompt } from "./prompt";
+import {
+  groundedAnswerTraceOutputs,
+  questionOnlyInputs,
+  retrievalTraceOutputs,
+} from "./tracing";
 import type {
   ChatTurn,
   GroundedAnswer,
@@ -34,7 +40,26 @@ function booksRefusal(reason: "low_score" | "uncited"): GroundedAnswer {
   };
 }
 
-export async function generateGroundedAnswer(
+function noteRetrieval(
+  passages: RetrievedPassage[],
+  threshold: number,
+): void {
+  const run = getCurrentRunTree(true);
+  if (typeof run?.addEvent !== "function") {
+    return;
+  }
+  const snapshot = retrievalTraceOutputs(passages);
+  run.addEvent({
+    name: "retrieval",
+    kwargs: {
+      ...snapshot,
+      threshold,
+      passed: snapshot.count > 0 && snapshot.bestScore >= threshold,
+    },
+  });
+}
+
+async function generateGroundedAnswerUntraced(
   input: { question: string; history?: ChatTurn[] },
   deps: GenerateDeps,
 ): Promise<GroundedAnswer> {
@@ -48,6 +73,7 @@ export async function generateGroundedAnswer(
   }
 
   const passages = await deps.retrievePassages(input.question);
+  noteRetrieval(passages, deps.scoreThreshold);
   if (passages.length === 0 || bestScore(passages) < deps.scoreThreshold) {
     return booksRefusal("low_score");
   }
@@ -75,3 +101,10 @@ export async function generateGroundedAnswer(
     refused: false,
   };
 }
+
+export const generateGroundedAnswer = traceable(generateGroundedAnswerUntraced, {
+  name: "generate_grounded_answer",
+  run_type: "chain",
+  processInputs: questionOnlyInputs,
+  processOutputs: (outputs) => groundedAnswerTraceOutputs(outputs),
+});

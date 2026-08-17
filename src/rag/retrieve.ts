@@ -1,4 +1,6 @@
+import { traceable } from "langsmith/traceable";
 import type { ScoredChunkHit } from "../qdrant/chunks";
+import { questionOnlyInputs, retrievalTraceOutputs } from "./tracing";
 import type { RetrievedPassage } from "./types";
 
 export type RetrieveDeps = {
@@ -23,7 +25,7 @@ export function toRetrievedPassage(hit: ScoredChunkHit): RetrievedPassage {
   };
 }
 
-export async function retrievePassages(
+async function retrievePassagesUntraced(
   question: string,
   deps: RetrieveDeps,
 ): Promise<RetrievedPassage[]> {
@@ -31,3 +33,13 @@ export async function retrievePassages(
   const hits = await deps.searchChunks(vector, deps.topK);
   return hits.map(toRetrievedPassage);
 }
+
+export const retrievePassages = traceable(retrievePassagesUntraced, {
+  name: "retrieve_passages",
+  run_type: "retriever",
+  processInputs: questionOnlyInputs,
+  processOutputs: (outputs) => {
+    const passages = "outputs" in outputs ? outputs.outputs : [];
+    return retrievalTraceOutputs(Array.isArray(passages) ? passages : []);
+  },
+});
