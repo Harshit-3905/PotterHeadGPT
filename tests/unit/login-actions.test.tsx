@@ -79,7 +79,7 @@ describe("LoginActions", () => {
 
     expect(signIn).toHaveBeenCalledWith("google", {
       redirect: false,
-      redirectTo: "/chat",
+      redirectTo: "/auth/complete",
     });
   });
 

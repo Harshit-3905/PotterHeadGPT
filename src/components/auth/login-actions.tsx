@@ -42,7 +42,7 @@ export function LoginActions({
     try {
       const result = await signIn(provider, {
         redirect: false,
-        redirectTo: "/chat",
+        redirectTo: provider === "google" ? "/auth/complete" : "/chat",
       });
 
       if (result?.ok && result.url) {
