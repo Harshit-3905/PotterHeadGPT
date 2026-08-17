@@ -22,6 +22,7 @@ export function createChatModel(apiKey: string): ChatOpenAI {
     apiKey,
     model: "gpt-4o-mini",
     temperature: 0,
+    streaming: true,
   });
 }
 

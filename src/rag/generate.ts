@@ -18,11 +18,23 @@ import type {
   RetrievedPassage,
 } from "./types";
 
+export type CompletionSource =
+  | string
+  | Promise<string>
+  | AsyncIterable<{ content: unknown }>
+  | Promise<AsyncIterable<{ content: unknown }>>;
+
 export type GenerateDeps = {
   classifyTopic: (question: string) => Promise<"harry_potter" | "other">;
   retrievePassages: (question: string) => Promise<RetrievedPassage[]>;
-  complete: (messages: BaseMessage[]) => Promise<string>;
+  complete: (messages: BaseMessage[]) => CompletionSource;
   scoreThreshold: number;
+};
+
+export type GenerateInput = {
+  question: string;
+  history?: ChatTurn[];
+  onToken?: (token: string) => void;
 };
 
 function bestScore(passages: RetrievedPassage[]): number {
@@ -61,22 +73,59 @@ function noteRetrieval(
 
 export async function readModelStream(
   stream: AsyncIterable<{ content: unknown }>,
+  onToken?: (token: string) => void,
 ): Promise<string> {
   let text = "";
   for await (const chunk of stream) {
-    if (typeof chunk.content === "string") {
+    if (typeof chunk.content === "string" && chunk.content.length > 0) {
       text += chunk.content;
+      onToken?.(chunk.content);
     }
   }
   return text;
 }
 
+function isAsyncIterable(
+  value: unknown,
+): value is AsyncIterable<{ content: unknown }> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    Symbol.asyncIterator in value
+  );
+}
+
+async function collectCompletion(
+  source: CompletionSource,
+  onToken?: (token: string) => void,
+): Promise<string> {
+  const resolved = isAsyncIterable(source) ? source : await source;
+
+  if (typeof resolved === "string") {
+    if (resolved) {
+      onToken?.(resolved);
+    }
+    return resolved;
+  }
+
+  return readModelStream(resolved, onToken);
+}
+
+function emitRefusal(
+  onToken: ((token: string) => void) | undefined,
+  reason: "low_score" | "uncited",
+): GroundedAnswer {
+  onToken?.(BOOKS_REFUSAL);
+  return booksRefusal(reason);
+}
+
 async function generateGroundedAnswerUntraced(
-  input: { question: string; history?: ChatTurn[] },
+  input: GenerateInput,
   deps: GenerateDeps,
 ): Promise<GroundedAnswer> {
   const topic = await deps.classifyTopic(input.question);
   if (topic === "other") {
+    input.onToken?.(OFF_TOPIC_REFUSAL);
     return {
       answer: OFF_TOPIC_REFUSAL,
       citations: [],
@@ -87,7 +136,7 @@ async function generateGroundedAnswerUntraced(
   const passages = await deps.retrievePassages(input.question);
   noteRetrieval(passages, deps.scoreThreshold);
   if (passages.length === 0 || bestScore(passages) < deps.scoreThreshold) {
-    return booksRefusal("low_score");
+    return emitRefusal(input.onToken, "low_score");
   }
 
   const messages = buildGroundedPrompt(
@@ -95,7 +144,7 @@ async function generateGroundedAnswerUntraced(
     passages,
     input.history ?? [],
   );
-  const raw = await deps.complete(messages);
+  const raw = await collectCompletion(deps.complete(messages), input.onToken);
   const answer = stripInvalidCitationMarkers(raw, passages.length).trim();
 
   if (answer === BOOKS_REFUSAL) {

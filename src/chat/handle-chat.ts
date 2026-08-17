@@ -51,6 +51,7 @@ export type ChatDeps = {
   generate: (input: {
     question: string;
     history: ChatTurn[];
+    onToken?: (token: string) => void;
   }) => Promise<GroundedAnswer>;
 };
 
@@ -74,18 +75,30 @@ export type ChatResponse =
       };
     };
 
-export async function handleChatRequest(
+export type PreparedChat = {
+  userId: string;
+  role: UserRole;
+  message: string;
+  conversationId: string;
+  history: ChatTurn[];
+  usage: UsageStatus;
+};
+
+export async function prepareChatRequest(
   session: ChatSession,
   body: unknown,
   deps: ChatDeps,
-): Promise<ChatResponse> {
+): Promise<
+  | { ok: true; prepared: PreparedChat }
+  | { ok: false; response: Exclude<ChatResponse, { status: 200 }> }
+> {
   if (!session?.user.id) {
-    return { status: 401, body: { error: "Unauthorized" } };
+    return { ok: false, response: { status: 401, body: { error: "Unauthorized" } } };
   }
 
   const parsed = chatRequestSchema.safeParse(body);
   if (!parsed.success) {
-    return { status: 400, body: { error: "Invalid request" } };
+    return { ok: false, response: { status: 400, body: { error: "Invalid request" } } };
   }
 
   const { message, conversationId: existingId } = parsed.data;
@@ -95,22 +108,27 @@ export async function handleChatRequest(
   if (conversationId) {
     const owned = await deps.findConversation(userId, conversationId);
     if (!owned) {
-      return { status: 404, body: { error: "Conversation not found" } };
+      return {
+        ok: false,
+        response: { status: 404, body: { error: "Conversation not found" } },
+      };
     }
   }
 
   const reservation = await deps.reserveMessage(userId, role);
   if (!reservation.allowed) {
     return {
-      status: 429,
-      body: {
-        error: "Daily message limit reached",
-        usage: reservation.status,
+      ok: false,
+      response: {
+        status: 429,
+        body: {
+          error: "Daily message limit reached",
+          usage: reservation.status,
+        },
       },
     };
   }
 
-  let phase: "setup" | "generate" | "persist" = "setup";
   try {
     if (!conversationId) {
       const created = await deps.createConversation(userId, message);
@@ -121,7 +139,41 @@ export async function handleChatRequest(
       ? await deps.listRecentTurns(userId, conversationId, HISTORY_TURN_LIMIT)
       : [];
 
-    phase = "generate";
+    return {
+      ok: true,
+      prepared: {
+        userId,
+        role,
+        message,
+        conversationId,
+        history,
+        usage: reservation.status,
+      },
+    };
+  } catch {
+    await deps.releaseMessage(userId, role);
+    return {
+      ok: false,
+      response: { status: 500, body: { error: "Something went wrong" } },
+    };
+  }
+}
+
+export async function handleChatRequest(
+  session: ChatSession,
+  body: unknown,
+  deps: ChatDeps,
+): Promise<ChatResponse> {
+  const prepared = await prepareChatRequest(session, body, deps);
+  if (!prepared.ok) {
+    return prepared.response;
+  }
+
+  const { userId, role, message, conversationId, history, usage } =
+    prepared.prepared;
+  let phase: "generate" | "persist" = "generate";
+
+  try {
     const answer = await deps.generate({
       question: message,
       history,
@@ -144,7 +196,7 @@ export async function handleChatRequest(
         answer: answer.answer,
         citations: answer.citations,
         refused: answer.refused,
-        usage: reservation.status,
+        usage,
       },
     };
   } catch {

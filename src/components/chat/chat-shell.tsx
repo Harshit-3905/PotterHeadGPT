@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { beginGoogleUpgrade, signOutToLogin } from "@/auth/actions";
 import { readChatNdjson } from "@/chat/read-ndjson";
 import type { UsageStatus } from "@/usage/types";
@@ -172,13 +173,15 @@ export function ChatShell({
         }
 
         if (event.type === "token") {
-          setMessages((current) =>
-            current.map((message) =>
-              message.id === tempAssistantId
-                ? { ...message, content: message.content + event.value }
-                : message,
-            ),
-          );
+          flushSync(() => {
+            setMessages((current) =>
+              current.map((message) =>
+                message.id === tempAssistantId
+                  ? { ...message, content: message.content + event.value }
+                  : message,
+              ),
+            );
+          });
         }
 
         if (event.type === "citations") {
@@ -203,6 +206,7 @@ export function ChatShell({
                     ...message,
                     id: event.assistantMessageId,
                     status: "complete",
+                    content: event.content ?? message.content,
                   }
                 : message,
             ),

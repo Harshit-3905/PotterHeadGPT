@@ -1,6 +1,6 @@
 import { auth } from "@/auth/config";
-import { handleChatRequest } from "@/chat/handle-chat";
-import { toChatHttpResponse } from "@/chat/stream";
+import { prepareChatRequest } from "@/chat/handle-chat";
+import { toChatHttpResponse, toLiveChatResponse } from "@/chat/stream";
 import { db } from "@/db";
 import {
   createConversation,
@@ -10,6 +10,8 @@ import { listRecentTurns, persistExchange } from "@/db/queries/messages";
 import { env } from "@/env";
 import { createGroundedAnswerGenerator } from "@/rag/pipeline";
 import { releaseMessage, reserveMessage } from "@/usage/daily-limit";
+
+export const dynamic = "force-dynamic";
 
 const generate = createGroundedAnswerGenerator({
   openaiApiKey: env.OPENAI_API_KEY,
@@ -29,7 +31,7 @@ export async function POST(request: Request) {
     body = null;
   }
 
-  const result = await handleChatRequest(session, body, {
+  const prepared = await prepareChatRequest(session, body, {
     findConversation: (userId, conversationId) =>
       findOwnedConversation(db, userId, conversationId),
     createConversation: (userId, firstQuestion) =>
@@ -52,5 +54,18 @@ export async function POST(request: Request) {
     generate,
   });
 
-  return toChatHttpResponse(result);
+  if (!prepared.ok) {
+    return toChatHttpResponse(prepared.response);
+  }
+
+  return toLiveChatResponse(prepared.prepared, {
+    generate,
+    persistExchange: (input) => persistExchange(db, input),
+    releaseMessage: (userId, role) =>
+      releaseMessage(db, {
+        userId,
+        role,
+        limit: env.DAILY_MESSAGE_LIMIT,
+      }),
+  });
 }

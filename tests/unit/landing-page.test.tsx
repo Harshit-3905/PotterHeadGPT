@@ -28,7 +28,7 @@ describe("landing page", () => {
 
     const sources = screen.getByRole("list", { name: /sources/i });
     expect(
-      within(sources).getByRole("button", { name: /citation 1/i }),
+      within(sources).getByRole("button", { name: /citation 5/i }),
     ).toBeInTheDocument();
   });
 

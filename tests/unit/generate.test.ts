@@ -80,6 +80,47 @@ describe("generateGroundedAnswer", () => {
     });
   });
 
+  it("forwards model chunks to onToken before generation finishes", async () => {
+    const seen: string[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    async function* complete() {
+      yield { content: "The key " };
+      await gate;
+      yield { content: "is beneath the observatory. [1]" };
+    }
+
+    const pending = generateGroundedAnswer(
+      {
+        question: "Where is the key?",
+        onToken: (token) => {
+          seen.push(token);
+        },
+      },
+      {
+        classifyTopic: async () => "harry_potter",
+        retrievePassages: async () => [strongPassage],
+        complete,
+        scoreThreshold: 0.72,
+      },
+    );
+
+    await vi.waitFor(() => {
+      expect(seen).toEqual(["The key "]);
+    });
+
+    release();
+    const result = await pending;
+    expect(seen).toEqual([
+      "The key ",
+      "is beneath the observatory. [1]",
+    ]);
+    expect(result.answer).toBe("The key is beneath the observatory. [1]");
+  });
+
   it("returns cited answers with book and chapter metadata", async () => {
     const result = await generateGroundedAnswer(
       { question: "Where is the key?" },

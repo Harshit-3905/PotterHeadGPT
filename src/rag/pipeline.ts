@@ -1,6 +1,7 @@
 import { createQdrantClient } from "../qdrant/client";
 import { searchChunks } from "../qdrant/chunks";
-import { generateGroundedAnswer, readModelStream } from "./generate";
+import type { GenerateInput } from "./generate";
+import { generateGroundedAnswer } from "./generate";
 import {
   createChatModel,
   createEmbeddings,
@@ -8,7 +9,7 @@ import {
 } from "./models";
 import { retrievePassages } from "./retrieve";
 import { classifyTopic } from "./topic-guard";
-import type { ChatTurn, GroundedAnswer } from "./types";
+import type { GroundedAnswer } from "./types";
 
 export type GroundedAnswerGeneratorConfig = {
   openaiApiKey: string;
@@ -21,10 +22,7 @@ export type GroundedAnswerGeneratorConfig = {
 
 export function createGroundedAnswerGenerator(
   config: GroundedAnswerGeneratorConfig,
-): (input: {
-  question: string;
-  history: ChatTurn[];
-}) => Promise<GroundedAnswer> {
+): (input: GenerateInput) => Promise<GroundedAnswer> {
   const embeddings = createEmbeddings(config.openaiApiKey);
   const chat = createChatModel(config.openaiApiKey);
   const classifier = createTopicClassifier(config.openaiApiKey);
@@ -43,7 +41,7 @@ export function createGroundedAnswerGenerator(
             searchChunks(qdrant, config.collection, vector, limit),
           topK: config.topK,
         }),
-      complete: async (messages) => readModelStream(await chat.stream(messages)),
+      complete: (messages) => chat.stream(messages),
       scoreThreshold: config.scoreThreshold,
     });
 }

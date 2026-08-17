@@ -1,4 +1,4 @@
-import type { ChatResponse } from "./handle-chat";
+import type { ChatDeps, ChatResponse, PreparedChat } from "./handle-chat";
 import {
   encodeEvent,
   type ChatStreamEvent,
@@ -82,7 +82,78 @@ export function toChatHttpResponse(result: ChatResponse): Response {
     status: 200,
     headers: {
       "Content-Type": "application/x-ndjson; charset=utf-8",
-      "Cache-Control": "no-cache",
+      "Cache-Control": "no-cache, no-transform",
+      "X-Accel-Buffering": "no",
+    },
+  });
+}
+
+export function toLiveChatResponse(
+  prepared: PreparedChat,
+  deps: Pick<ChatDeps, "generate" | "persistExchange" | "releaseMessage">,
+): Response {
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const userMessageId = crypto.randomUUID();
+
+      try {
+        controller.enqueue(
+          encodeEvent({
+            type: "start",
+            conversationId: prepared.conversationId,
+            userMessageId,
+          }),
+        );
+
+        const answer = await deps.generate({
+          question: prepared.message,
+          history: prepared.history,
+          onToken: (value) => {
+            controller.enqueue(encodeEvent({ type: "token", value }));
+          },
+        });
+
+        const persisted = await deps.persistExchange({
+          userId: prepared.userId,
+          conversationId: prepared.conversationId,
+          question: prepared.message,
+          answer,
+        });
+
+        controller.enqueue(
+          encodeEvent({ type: "citations", value: answer.citations }),
+        );
+        controller.enqueue(
+          encodeEvent({ type: "usage", value: prepared.usage }),
+        );
+        controller.enqueue(
+          encodeEvent({
+            type: "done",
+            assistantMessageId: persisted.assistantMessageId,
+            content: answer.answer,
+          }),
+        );
+        controller.close();
+      } catch {
+        await deps.releaseMessage(prepared.userId, prepared.role);
+        controller.enqueue(
+          encodeEvent({
+            type: "error",
+            code: "stream_failed",
+            message: "Something went wrong",
+          }),
+        );
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/x-ndjson; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      "X-Accel-Buffering": "no",
     },
   });
 }

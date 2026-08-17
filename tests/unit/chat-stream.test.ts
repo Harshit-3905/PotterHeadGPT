@@ -4,9 +4,11 @@ import {
   chatResultToEvents,
   safeChatEvents,
   toChatHttpResponse,
+  toLiveChatResponse,
 } from "@/chat/stream";
-import { parseEvent, type ChatStreamEvent } from "@/rag/stream-events";
 import type { ChatResponse } from "@/chat/handle-chat";
+import { parseEvent, type ChatStreamEvent } from "@/rag/stream-events";
+import type { ChatTurn } from "@/rag/types";
 
 const success: Extract<ChatResponse, { status: 200 }> = {
   status: 200,
@@ -78,6 +80,96 @@ describe("safeChatEvents", () => {
       message: "Something went wrong",
     });
     expect(events.some((event) => event.type === "done")).toBe(false);
+  });
+});
+
+describe("toLiveChatResponse", () => {
+  it("emits start and tokens before generate finishes", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    const generate = async ({
+      onToken,
+    }: {
+      question: string;
+      history: ChatTurn[];
+      onToken?: (token: string) => void;
+    }) => {
+      onToken?.("The scar ");
+      await gate;
+      onToken?.("is from the curse. [1]");
+      return {
+        answer: success.body.answer,
+        citations: success.body.citations,
+        refused: false as const,
+      };
+    };
+
+    const persistExchange = async () => ({
+      userMessageId: success.body.userMessageId,
+      assistantMessageId: success.body.assistantMessageId,
+    });
+
+    const response = toLiveChatResponse(
+      {
+        userId: "11111111-1111-4111-8111-111111111111",
+        role: "user",
+        message: "Why the scar?",
+        conversationId: success.body.conversationId,
+        history: [],
+        usage: success.body.usage,
+      },
+      {
+        generate,
+        persistExchange,
+        releaseMessage: async () => undefined,
+      },
+    );
+
+    const reader = response.body?.getReader();
+    expect(reader).toBeDefined();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    const events: ChatStreamEvent[] = [];
+
+    while (events.length < 2) {
+      const { done, value } = await reader!.read();
+      if (done) {
+        break;
+      }
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (line.trim()) {
+          events.push(parseEvent(line));
+        }
+      }
+    }
+
+    expect(events[0]).toMatchObject({
+      type: "start",
+      conversationId: success.body.conversationId,
+    });
+    expect(events[1]).toEqual({ type: "token", value: "The scar " });
+
+    release();
+
+    while (true) {
+      const { done, value } = await reader!.read();
+      if (value) {
+        buffer += decoder.decode(value, { stream: !done });
+      }
+      if (done) {
+        buffer += decoder.decode();
+        break;
+      }
+    }
+
+    expect(buffer).toContain('"type":"done"');
+    expect(buffer).toContain('"type":"token","value":"is from the curse. [1]"');
   });
 });
 
