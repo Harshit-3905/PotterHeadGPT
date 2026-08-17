@@ -56,7 +56,6 @@ export const messages = pgTable(
 export type CitationMetadataSnapshot = {
   book: string;
   chapter: string | null;
-  page: number | null;
 };
 
 export const messageCitations = pgTable(

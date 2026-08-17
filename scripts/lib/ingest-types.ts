@@ -1,4 +1,4 @@
-export const INGEST_VERSION = "1";
+export const INGEST_VERSION = "2";
 
 export const CHUNK_SIZE = 4000;
 export const CHUNK_OVERLAP = 700;
@@ -27,7 +27,6 @@ export type ChapterChunk = {
   embedInput: string;
   book: string;
   chapter: string;
-  page: number | null;
   chunkIndex: number;
 };
 
@@ -37,7 +36,6 @@ export type ChunkPayload = {
   chunkIndex: number;
   book: string;
   chapter: string | null;
-  page: number | null;
 };
 
 export type ChunkPoint = {

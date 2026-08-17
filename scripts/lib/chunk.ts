@@ -35,7 +35,6 @@ export async function splitChapterChunks(
         embedInput: buildEmbedInput(trimmed),
         book,
         chapter: chapter.title,
-        page: chapter.startPage,
         chunkIndex: chunks.length,
       });
     }

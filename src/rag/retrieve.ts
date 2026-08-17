@@ -19,7 +19,6 @@ export function toRetrievedPassage(hit: ScoredChunkHit): RetrievedPassage {
     metadata: {
       book: hit.payload.book,
       chapter: hit.payload.chapter,
-      page: hit.payload.page,
     },
     score: hit.score,
   };

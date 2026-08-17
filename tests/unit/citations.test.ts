@@ -14,14 +14,13 @@ const passages: RetrievedPassage[] = [
     metadata: {
       book: "The Lantern Academy",
       chapter: "The Moonstone Key",
-      page: 2,
     },
     score: 0.9,
   },
   {
     chunkId: "chunk-2",
     content: "The archive opens only when touched by starlight.",
-    metadata: { book: "The Lantern Academy", chapter: "Starlight", page: 4 },
+    metadata: { book: "The Lantern Academy", chapter: "Starlight" },
     score: 0.8,
   },
 ];
@@ -63,7 +62,6 @@ describe("buildCitationPayload", () => {
         quote: "The archive opens only when touched by starlight.",
         book: "The Lantern Academy",
         chapter: "Starlight",
-        page: 4,
       },
       {
         ordinal: 1,
@@ -71,7 +69,6 @@ describe("buildCitationPayload", () => {
         quote: "The moonstone key is kept beneath the observatory.",
         book: "The Lantern Academy",
         chapter: "The Moonstone Key",
-        page: 2,
       },
     ]);
   });

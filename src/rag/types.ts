@@ -1,7 +1,6 @@
 export type SourceMetadata = {
   book: string;
   chapter: string | null;
-  page: number | null;
 };
 
 export type RetrievedPassage = {
@@ -17,7 +16,6 @@ export type CitationPayload = {
   quote: string;
   book: string;
   chapter: string | null;
-  page: number | null;
 };
 
 export type ChatTurn = {

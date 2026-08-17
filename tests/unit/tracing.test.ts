@@ -14,14 +14,13 @@ const passages: RetrievedPassage[] = [
     metadata: {
       book: "The Lantern Academy",
       chapter: "The Moonstone Key",
-      page: 2,
     },
     score: 0.91,
   },
   {
     chunkId: "chunk-2",
     content: "The archive opens only when touched by starlight.",
-    metadata: { book: "The Lantern Academy", chapter: "Starlight", page: 4 },
+    metadata: { book: "The Lantern Academy", chapter: "Starlight" },
     score: 0.8,
   },
 ];
@@ -38,7 +37,6 @@ describe("retrievalTraceOutputs", () => {
           score: 0.91,
           book: "The Lantern Academy",
           chapter: "The Moonstone Key",
-          page: 2,
           content: "The moonstone key is kept beneath the observatory.",
         },
         {
@@ -46,7 +44,6 @@ describe("retrievalTraceOutputs", () => {
           score: 0.8,
           book: "The Lantern Academy",
           chapter: "Starlight",
-          page: 4,
           content: "The archive opens only when touched by starlight.",
         },
       ],
@@ -67,7 +64,6 @@ describe("groundedAnswerTraceOutputs", () => {
             quote: passages[0]!.content,
             book: "The Lantern Academy",
             chapter: "The Moonstone Key",
-            page: 2,
           },
         ],
       }),

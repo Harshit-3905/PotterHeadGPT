@@ -97,7 +97,7 @@ describe("splitChapterChunks", () => {
       ),
     ).toBe(false);
     expect(chunks[0]?.chapter).toBe("The Moonstone Key");
-    expect(chunks[0]?.page).toBe(2);
+    expect(chunks[0]).not.toHaveProperty("page");
   });
 });
 

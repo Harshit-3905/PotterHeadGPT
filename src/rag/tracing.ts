@@ -11,7 +11,6 @@ export function retrievalTraceOutputs(passages: RetrievedPassage[]) {
       score: passage.score,
       book: passage.metadata.book,
       chapter: passage.metadata.chapter,
-      page: passage.metadata.page,
       content: passage.content,
     })),
   };

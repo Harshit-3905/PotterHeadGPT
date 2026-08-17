@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
 import {
+  deleteAllChunks,
   deleteChunksByDocumentId,
   upsertChunks,
 } from "@/qdrant/chunks";
@@ -60,7 +61,6 @@ describe("chunk writes", () => {
           chunkIndex: 0,
           book: "The Lantern Academy",
           chapter: "Starlight",
-          page: 4,
         },
       },
     ]);
@@ -77,7 +77,6 @@ describe("chunk writes", () => {
             chunkIndex: 0,
             book: "The Lantern Academy",
             chapter: "Starlight",
-            page: 4,
           },
         },
       ],
@@ -96,6 +95,19 @@ describe("chunk writes", () => {
       filter: {
         must: [{ key: "documentId", match: { value: "doc-1" } }],
       },
+    });
+  });
+
+  it("deletes all points with an empty filter", async () => {
+    const client = {
+      delete: vi.fn(async () => ({ status: "completed" })),
+    };
+
+    await deleteAllChunks(client, "book_chunks");
+
+    expect(client.delete).toHaveBeenCalledWith("book_chunks", {
+      wait: true,
+      filter: {},
     });
   });
 });

@@ -66,7 +66,6 @@ export function buildCitationPayload(
         quote: passage.content,
         book: passage.metadata.book,
         chapter: passage.metadata.chapter,
-        page: passage.metadata.page,
       },
     ];
   });

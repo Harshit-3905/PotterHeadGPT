@@ -8,7 +8,6 @@ export type ChunkPayload = {
   chunkIndex: number;
   book: string;
   chapter: string | null;
-  page: number | null;
 };
 
 export type ChunkPoint = {
@@ -39,9 +38,9 @@ export type QdrantPointsClient = {
     collection: string,
     args: {
       wait: true;
-      filter: {
-        must: Array<{ key: string; match: { value: string } }>;
-      };
+    filter: {
+      must?: Array<{ key: string; match: { value: string } }>;
+    };
     },
   ) => Promise<unknown>;
 };
@@ -94,6 +93,16 @@ export async function deleteChunksByDocumentId(
   });
 }
 
+export async function deleteAllChunks(
+  client: Pick<QdrantPointsClient, "delete">,
+  collection: string,
+): Promise<void> {
+  await client.delete(collection, {
+    wait: true,
+    filter: {},
+  });
+}
+
 export function assertQueryVector(vector: number[]): void {
   if (
     vector.length !== QDRANT_VECTOR_SIZE ||
@@ -119,7 +128,6 @@ function asChunkPayload(
       typeof payload.chunkIndex === "number" ? payload.chunkIndex : 0,
     book: payload.book,
     chapter: typeof payload.chapter === "string" ? payload.chapter : null,
-    page: typeof payload.page === "number" ? payload.page : null,
   };
 }
 

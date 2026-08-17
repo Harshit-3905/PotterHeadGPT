@@ -13,7 +13,6 @@ const strongPassage: RetrievedPassage = {
   metadata: {
     book: "The Lantern Academy",
     chapter: "The Moonstone Key",
-    page: 2,
   },
   score: 0.9,
 };
@@ -101,7 +100,6 @@ describe("generateGroundedAnswer", () => {
         quote: "The moonstone key is kept beneath the observatory.",
         book: "The Lantern Academy",
         chapter: "The Moonstone Key",
-        page: 2,
       },
     ]);
   });

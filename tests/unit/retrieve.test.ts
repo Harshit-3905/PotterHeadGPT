@@ -22,7 +22,6 @@ describe("searchChunks", () => {
             chunkIndex: 0,
             book: "The Lantern Academy",
             chapter: "Starlight",
-            page: 4,
           },
         },
       ],
@@ -45,7 +44,6 @@ describe("searchChunks", () => {
           chunkIndex: 0,
           book: "The Lantern Academy",
           chapter: "Starlight",
-          page: 4,
         },
       },
     ]);
@@ -75,7 +73,6 @@ describe("retrievePassages", () => {
           chunkIndex: 0,
           book: "The Lantern Academy",
           chapter: "The Moonstone Key",
-          page: 2,
         },
       },
     ]);
@@ -94,7 +91,6 @@ describe("retrievePassages", () => {
         metadata: {
           book: "The Lantern Academy",
           chapter: "The Moonstone Key",
-          page: 2,
         },
         score: 0.93,
       },

@@ -11,7 +11,6 @@ const passages: RetrievedPassage[] = [
     metadata: {
       book: "The Lantern Academy",
       chapter: "The Moonstone Key",
-      page: 2,
     },
     score: 0.91,
   },
@@ -45,7 +44,6 @@ describe("buildGroundedPrompt", () => {
           metadata: {
             book: 'Lantern & "Academy"',
             chapter: "A <B>",
-            page: 1,
           },
           content: "1 < 2",
         },

@@ -61,3 +61,7 @@ export async function updateDocument(
     })
     .where(eq(documents.id, id));
 }
+
+export async function deleteAllDocuments(db: Database) {
+  await db.delete(documents);
+}

@@ -60,7 +60,6 @@ export async function ingestPreparedBook(
       chunkIndex: chunk.chunkIndex,
       book: chunk.book,
       chapter: chunk.chapter,
-      page: chunk.page,
     },
   }));
 
