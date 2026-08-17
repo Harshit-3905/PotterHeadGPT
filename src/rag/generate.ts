@@ -59,6 +59,18 @@ function noteRetrieval(
   });
 }
 
+export async function readModelStream(
+  stream: AsyncIterable<{ content: unknown }>,
+): Promise<string> {
+  let text = "";
+  for await (const chunk of stream) {
+    if (typeof chunk.content === "string") {
+      text += chunk.content;
+    }
+  }
+  return text;
+}
+
 async function generateGroundedAnswerUntraced(
   input: { question: string; history?: ChatTurn[] },
   deps: GenerateDeps,

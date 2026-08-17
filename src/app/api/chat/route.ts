@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
 import { auth } from "@/auth/config";
 import { handleChatRequest } from "@/chat/handle-chat";
+import { toChatHttpResponse } from "@/chat/stream";
 import { db } from "@/db";
 import {
   createConversation,
@@ -52,5 +52,5 @@ export async function POST(request: Request) {
     generate,
   });
 
-  return NextResponse.json(result.body, { status: result.status });
+  return toChatHttpResponse(result);
 }

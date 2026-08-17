@@ -1,6 +1,6 @@
 import { createQdrantClient } from "../qdrant/client";
 import { searchChunks } from "../qdrant/chunks";
-import { generateGroundedAnswer } from "./generate";
+import { generateGroundedAnswer, readModelStream } from "./generate";
 import {
   createChatModel,
   createEmbeddings,
@@ -43,13 +43,7 @@ export function createGroundedAnswerGenerator(
             searchChunks(qdrant, config.collection, vector, limit),
           topK: config.topK,
         }),
-      complete: async (messages) => {
-        const response = await chat.invoke(messages);
-        if (typeof response.content !== "string") {
-          throw new Error("Chat model returned non-text content");
-        }
-        return response.content;
-      },
+      complete: async (messages) => readModelStream(await chat.stream(messages)),
       scoreThreshold: config.scoreThreshold,
     });
 }
