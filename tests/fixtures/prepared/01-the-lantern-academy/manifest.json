@@ -1,0 +1,23 @@
+{
+  "title": "The Lantern Academy",
+  "slug": "01-the-lantern-academy",
+  "sourcePath": "tests/fixtures/prepared/01-the-lantern-academy",
+  "checksum": "fixture",
+  "chapterCount": 2,
+  "chapters": [
+    {
+      "index": 1,
+      "title": "The Moonstone Key",
+      "file": "01-the-moonstone-key.txt",
+      "startPage": 2,
+      "endPage": 3
+    },
+    {
+      "index": 2,
+      "title": "Starlight",
+      "file": "02-starlight.txt",
+      "startPage": 4,
+      "endPage": 4
+    }
+  ]
+}
