@@ -1,3 +1,7 @@
 export default function ChatLayout({ children }: LayoutProps<"/chat">) {
-  return <div className="flex min-h-0 flex-1 flex-col">{children}</div>;
+  return (
+    <div className="fixed inset-0 flex flex-col overflow-hidden overscroll-none">
+      {children}
+    </div>
+  );
 }

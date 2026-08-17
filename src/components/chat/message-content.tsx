@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { CitationPayload } from "@/rag/types";
-import { Citation } from "./citation";
+import { CitationMark } from "./citation";
 import { CitationFootnotes } from "./citation-footnotes";
 import { tokenizeMessageContent } from "./tokenize";
 
@@ -39,14 +39,7 @@ export function MessageContent({
             return <span key={index}>[{token.ordinal}]</span>;
           }
 
-          return (
-            <Citation
-              key={index}
-              citation={citation}
-              open={openOrdinal === citation.ordinal}
-              onOpen={() => toggle(citation.ordinal)}
-            />
-          );
+          return <CitationMark key={index} ordinal={citation.ordinal} />;
         })}
       </span>
 

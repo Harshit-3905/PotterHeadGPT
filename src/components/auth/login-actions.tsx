@@ -15,7 +15,7 @@ const PENDING_MESSAGE: Record<Provider, string> = {
 const FAILURE_MESSAGE = "That sign-in did not go through. Please try again.";
 
 const BUTTON_BASE =
-  "inline-flex w-full items-center justify-center rounded-full px-8 py-4 text-sm font-medium uppercase tracking-[0.18em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-bright disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex w-full items-center justify-center px-8 py-4 text-sm font-medium uppercase tracking-[0.18em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-bright disabled:cursor-not-allowed disabled:opacity-60";
 
 function defaultNavigate(url: string) {
   window.location.assign(url);

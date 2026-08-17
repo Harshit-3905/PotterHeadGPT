@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import Home from "@/app/page";
 
@@ -7,7 +7,7 @@ describe("landing page", () => {
     render(<Home />);
 
     expect(
-      screen.getByRole("link", { name: /start a conversation/i }),
+      screen.getByRole("link", { name: /ask the books/i }),
     ).toHaveAttribute("href", "/chat");
   });
 
@@ -16,6 +16,19 @@ describe("landing page", () => {
 
     expect(
       screen.getByRole("heading", { level: 1, name: /potterheadgpt/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a cited chat specimen with sources at the end of the answer", () => {
+    render(<Home />);
+
+    expect(
+      screen.getByText(/why does the sorting hat consider slytherin for harry/i),
+    ).toBeInTheDocument();
+
+    const sources = screen.getByRole("list", { name: /sources/i });
+    expect(
+      within(sources).getByRole("button", { name: /citation 1/i }),
     ).toBeInTheDocument();
   });
 
@@ -31,3 +44,4 @@ describe("landing page", () => {
     ).not.toBeInTheDocument();
   });
 });
+

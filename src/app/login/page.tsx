@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth/config";
 import { LoginActions } from "@/components/auth/login-actions";
+import { Constellation } from "@/components/landing/constellation";
 
 export const metadata: Metadata = {
   title: "Sign in \u00b7 PotterHeadGPT",
@@ -16,8 +17,10 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-6 py-20">
-      <div className="animate-rise w-full max-w-md rounded-2xl border border-ink-edge bg-ink-raised/80 px-8 py-12 shadow-[0_40px_120px_-60px_rgba(0,0,0,0.9)] sm:px-12">
+    <main className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-6 py-20">
+      <Constellation className="pointer-events-none absolute -right-16 top-10 w-[min(100%,36rem)] opacity-50" />
+
+      <div className="corner-frame relative z-10 w-full max-w-md bg-ink-raised/90 px-8 py-12 sm:px-12">
         <p className="text-center text-[0.65rem] font-medium uppercase tracking-[0.42em] text-gold">
           PotterHeadGPT
         </p>
@@ -31,10 +34,7 @@ export default async function LoginPage() {
           chat.
         </p>
 
-        <div
-          aria-hidden="true"
-          className="mx-auto mt-9 h-px w-16 bg-linear-to-r from-transparent via-gold-deep to-transparent"
-        />
+        <div aria-hidden="true" className="gilt-rule mx-auto mt-9 w-16" />
 
         <div className="mt-9">
           <LoginActions />
@@ -48,7 +48,7 @@ export default async function LoginPage() {
 
       <Link
         href="/"
-        className="mt-10 text-xs uppercase tracking-[0.24em] text-parchment-dim transition-colors duration-300 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-bright"
+        className="relative z-10 mt-10 text-[0.62rem] uppercase tracking-[0.24em] text-parchment-dim transition-colors duration-300 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-bright"
       >
         Back to the entrance
       </Link>

@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Geist, Geist_Mono } from "next/font/google";
+import { Cormorant_Garamond, Source_Serif_4 } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const sourceSerif = Source_Serif_4({
+  variable: "--font-source-serif",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "600"],
+  style: ["normal", "italic"],
 });
 
 const cormorant = Cormorant_Garamond({
@@ -29,9 +26,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} h-full antialiased`}
+      className={`${sourceSerif.variable} ${cormorant.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { MessageContent } from "@/components/chat/message-content";
@@ -14,7 +14,7 @@ const citations = [
 ];
 
 describe("MessageContent", () => {
-  it("turns [1] into a keyboard-focusable citation button", () => {
+  it("keeps [1] in the answer as text and puts the citation control in Sources", () => {
     render(
       <MessageContent
         content="The key is beneath the observatory [1]."
@@ -22,10 +22,12 @@ describe("MessageContent", () => {
       />,
     );
 
-    const marker = screen.getByRole("button", { name: /citation 1/i });
+    const sources = screen.getByRole("list", { name: /sources/i });
+    const marker = within(sources).getByRole("button", { name: /citation 1/i });
     expect(marker).toHaveAccessibleName(/citation 1/i);
     marker.focus();
     expect(marker).toHaveFocus();
+    expect(screen.getAllByRole("button")).toHaveLength(1);
   });
 
   it("lists sources under the answer without dumping the passage", () => {
@@ -54,7 +56,8 @@ describe("MessageContent", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /citation 1/i }));
+    const sources = screen.getByRole("list", { name: /sources/i });
+    await user.click(within(sources).getByRole("button", { name: /citation 1/i }));
 
     const passage = screen.getByRole("region", { name: /sample book/i });
     expect(passage).toBeVisible();

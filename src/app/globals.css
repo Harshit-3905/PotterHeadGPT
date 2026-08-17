@@ -1,21 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  /* Candlelit library: warm near-black ink, parchment text, gilt accents. */
   --background: #0b0a09;
-  --background-raised: #14120f;
-  --edge: #2a2219;
+  --background-raised: #16110c;
+  --background-wood: #1c1610;
+  --edge: #2c2418;
   --foreground: #efe6d6;
   --foreground-dim: #a89c86;
   --gold: #c9a86a;
   --gold-bright: #e8cd94;
   --gold-deep: #8a6d33;
   --crimson: #b42318;
+  --candle: rgba(201, 168, 106, 0.2);
+  --ember: rgba(138, 109, 51, 0.16);
 }
 
 @theme inline {
   --color-ink: var(--background);
   --color-ink-raised: var(--background-raised);
+  --color-ink-wood: var(--background-wood);
   --color-ink-edge: var(--edge);
   --color-parchment: var(--foreground);
   --color-parchment-dim: var(--foreground-dim);
@@ -27,21 +30,39 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-source-serif);
+  --font-serif: var(--font-source-serif);
   --font-display: var(--font-cormorant);
 
-  --animate-rise: rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-rise: rise 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-mote: mote 14s linear infinite;
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(0.75rem);
+    transform: translateY(0.85rem);
   }
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes mote {
+  0% {
+    transform: translate3d(0, 8px, 0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.55;
+  }
+  80% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translate3d(12px, -110vh, 0);
+    opacity: 0;
   }
 }
 
@@ -51,36 +72,44 @@ html {
 
 body {
   background-color: var(--background);
-  /* Two light sources: a candle above the page and embers in the far corner. */
   background-image:
-    radial-gradient(
-      120% 70% at 50% -12%,
-      rgba(201, 168, 106, 0.16),
-      transparent 62%
-    ),
-    radial-gradient(
-      70% 55% at 88% 112%,
-      rgba(138, 109, 51, 0.12),
-      transparent 66%
-    );
+    radial-gradient(120% 70% at 50% -12%, var(--candle), transparent 62%),
+    radial-gradient(70% 55% at 88% 112%, var(--ember), transparent 66%),
+    radial-gradient(40% 30% at 8% 80%, rgba(201, 168, 106, 0.06), transparent 70%);
   background-attachment: fixed;
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-source-serif), "Iowan Old Style", "Palatino Linotype",
+    Palatino, serif;
 }
 
-/* Paper tooth, so the flat panels read as pages rather than screens. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
 body::after {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 40;
   pointer-events: none;
-  opacity: 0.4;
+  opacity: 0.28;
   background-image: repeating-linear-gradient(
-    115deg,
-    rgba(239, 230, 214, 0.035) 0 1px,
-    transparent 1px 4px
+    118deg,
+    rgba(239, 230, 214, 0.03) 0 1px,
+    transparent 1px 5px
   );
+}
+
+::selection {
+  background: rgba(201, 168, 106, 0.38);
+  color: #efe6d6;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -91,6 +120,10 @@ body::after {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .dust-mote {
+    display: none;
+  }
 }
 
 .star-field {
@@ -99,5 +132,95 @@ body::after {
     radial-gradient(1px 1px at 38% 42%, rgba(232, 205, 148, 0.35), transparent 100%),
     radial-gradient(1px 1px at 71% 22%, rgba(232, 205, 148, 0.45), transparent 100%),
     radial-gradient(1px 1px at 82% 68%, rgba(232, 205, 148, 0.3), transparent 100%),
-    radial-gradient(1px 1px at 24% 78%, rgba(232, 205, 148, 0.4), transparent 100%);
+    radial-gradient(1px 1px at 24% 78%, rgba(232, 205, 148, 0.4), transparent 100%),
+    radial-gradient(1.5px 1.5px at 58% 12%, rgba(232, 205, 148, 0.5), transparent 100%);
+}
+
+.shelf-field {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 18px,
+      rgba(201, 168, 106, 0.045) 18px 19px
+    ),
+    linear-gradient(180deg, rgba(201, 168, 106, 0.04), transparent 18%);
+}
+
+.gilt-rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold-deep),
+    var(--gold),
+    var(--gold-deep),
+    transparent
+  );
+}
+
+.corner-frame {
+  position: relative;
+}
+
+.corner-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--gold-deep), var(--gold-deep)),
+    linear-gradient(var(--gold-deep), var(--gold-deep)),
+    linear-gradient(var(--gold-deep), var(--gold-deep)),
+    linear-gradient(var(--gold-deep), var(--gold-deep)),
+    linear-gradient(var(--gold-deep), var(--gold-deep)),
+    linear-gradient(var(--gold-deep), var(--gold-deep)),
+    linear-gradient(var(--gold-deep), var(--gold-deep)),
+    linear-gradient(var(--gold-deep), var(--gold-deep));
+  background-repeat: no-repeat;
+  background-size:
+    14px 1px,
+    1px 14px,
+    14px 1px,
+    1px 14px,
+    14px 1px,
+    1px 14px,
+    14px 1px,
+    1px 14px;
+  background-position:
+    top left,
+    top left,
+    top right,
+    top right,
+    bottom left,
+    bottom left,
+    bottom right,
+    bottom right;
+}
+
+.manuscript {
+  background:
+    linear-gradient(180deg, rgba(239, 230, 214, 0.04), transparent 42%),
+    color-mix(in srgb, var(--background-raised) 88%, #3a2c18);
+}
+
+.wax-card {
+  background:
+    linear-gradient(180deg, rgba(201, 168, 106, 0.16), rgba(201, 168, 106, 0.06)),
+    var(--background-raised);
+}
+
+.lectern {
+  background: color-mix(in srgb, var(--background-raised) 90%, transparent);
+  box-shadow:
+    0 24px 60px -36px rgba(201, 168, 106, 0.45),
+    inset 0 1px 0 rgba(232, 205, 148, 0.12);
+}
+
+.dust-mote {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(232, 205, 148, 0.55);
+  animation: mote 16s linear infinite;
 }

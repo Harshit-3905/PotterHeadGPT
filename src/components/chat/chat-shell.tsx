@@ -245,15 +245,16 @@ export function ChatShell({
     sending || !hasCorpus || (quota.remaining <= 0 && !quota.unlimited);
 
   return (
-    <div className="flex min-h-0 flex-1">
-      <aside className="relative hidden w-72 shrink-0 border-r border-ink-edge bg-ink/40 md:flex md:flex-col">
-        <div className="star-field pointer-events-none absolute inset-0 opacity-40" />
+    <div className="flex h-full min-h-0 overflow-hidden">
+      <aside className="relative hidden h-full min-h-0 w-72 shrink-0 overflow-hidden border-r border-ink-edge bg-ink-wood/80 md:flex md:flex-col">
+        <div className="shelf-field pointer-events-none absolute inset-0 opacity-80" />
+        <div className="star-field pointer-events-none absolute inset-0 opacity-30" />
         <ConversationSidebar conversations={threads} activeId={activeId} />
       </aside>
 
       {sidebarOpen ? (
         <div
-          className="fixed inset-0 z-[60] bg-ink/70 md:hidden"
+          className="fixed inset-0 z-60 bg-ink/80 md:hidden"
           role="presentation"
           onClick={() => setSidebarOpen(false)}
         >
@@ -261,10 +262,11 @@ export function ChatShell({
             role="dialog"
             aria-modal="true"
             aria-label="Conversations"
-            className="relative z-10 flex h-full w-72 flex-col border-r border-ink-edge bg-ink"
+            className="relative z-10 flex h-full w-72 flex-col overflow-hidden border-r border-ink-edge bg-ink-wood"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="star-field pointer-events-none absolute inset-0 opacity-40" />
+            <div className="shelf-field pointer-events-none absolute inset-0 opacity-80" />
+            <div className="star-field pointer-events-none absolute inset-0 opacity-30" />
             <ConversationSidebar
               conversations={threads}
               activeId={activeId}
@@ -274,27 +276,27 @@ export function ChatShell({
         </div>
       ) : null}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-4 border-b border-ink-edge px-4 py-4 sm:px-8">
-          <div className="flex items-center gap-3">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-ink-edge px-4 py-4 sm:px-8">
+          <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              className="rounded-full border border-ink-edge px-3 py-1.5 text-xs uppercase tracking-[0.14em] text-parchment-dim md:hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright"
+              className="border border-ink-edge px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.16em] text-parchment-dim md:hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright"
               onClick={() => setSidebarOpen(true)}
             >
               Threads
             </button>
-            <h1 className="font-display text-2xl font-light tracking-tight text-parchment">
+            <h1 className="truncate font-display text-2xl font-light tracking-tight text-parchment">
               PotterHeadGPT
             </h1>
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            <p className="rounded-full border border-gold/40 px-4 py-1.5 text-xs uppercase tracking-[0.18em] text-gold">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
+            <p className="border border-gold/40 px-4 py-1.5 text-[0.62rem] uppercase tracking-[0.18em] text-gold">
               {identity}
             </p>
             {session.role === "admin" ? (
-              <p className="text-xs uppercase tracking-[0.14em] text-parchment-dim">
+              <p className="text-[0.62rem] uppercase tracking-[0.14em] text-parchment-dim">
                 Admin — unlimited
               </p>
             ) : null}
@@ -302,7 +304,7 @@ export function ChatShell({
               <form action={beginGoogleUpgrade}>
                 <button
                   type="submit"
-                  className="rounded-full bg-gold px-4 py-2 text-xs font-medium uppercase tracking-[0.14em] text-ink transition-colors hover:bg-gold-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright"
+                  className="bg-gold px-4 py-2 text-[0.62rem] font-medium uppercase tracking-[0.16em] text-ink transition-colors hover:bg-gold-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright"
                 >
                   Sign in with Google
                 </button>
@@ -311,7 +313,7 @@ export function ChatShell({
             <form action={signOutToLogin}>
               <button
                 type="submit"
-                className="rounded-full border border-ink-edge px-4 py-2 text-xs uppercase tracking-[0.14em] text-parchment-dim transition-colors hover:border-gold/60 hover:text-parchment focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright"
+                className="border border-ink-edge px-4 py-2 text-[0.62rem] uppercase tracking-[0.16em] text-parchment-dim transition-colors hover:border-gold/60 hover:text-parchment focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright"
               >
                 Sign out
               </button>
@@ -319,7 +321,7 @@ export function ChatShell({
           </div>
         </header>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <MessageList
             messages={messages}
             onExample={(question) =>
@@ -329,7 +331,7 @@ export function ChatShell({
           <div ref={bottomRef} />
         </div>
 
-        <div className="border-t border-ink-edge px-4 py-4 sm:px-8">
+        <div className="shrink-0 border-t border-ink-edge px-4 py-5 sm:px-8">
           <div className="mx-auto flex max-w-2xl flex-col gap-3">
             <QuotaBanner usage={quota} />
             {session.isGuest ? (
@@ -350,7 +352,7 @@ export function ChatShell({
             {retryQuestion ? (
               <button
                 type="button"
-                className="self-start text-xs uppercase tracking-[0.14em] text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright"
+                className="self-start text-[0.62rem] uppercase tracking-[0.16em] text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright"
                 onClick={() => void send(retryQuestion, false)}
               >
                 Retry

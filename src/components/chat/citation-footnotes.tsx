@@ -33,14 +33,14 @@ export function CitationFootnotes({
   }, [openOrdinal, onToggle]);
 
   return (
-    <section className="mt-4 border-t border-ink-edge/80 pt-3" aria-labelledby={headingId}>
+    <section className="mt-5 border-t border-gold/20 pt-4" aria-labelledby={headingId}>
       <h3
         id={headingId}
-        className="text-[0.65rem] font-medium uppercase tracking-[0.18em] text-gold"
+        className="text-[0.62rem] font-medium uppercase tracking-[0.22em] text-gold"
       >
         Sources
       </h3>
-      <ol className="mt-2 flex flex-col gap-2" aria-labelledby={headingId}>
+      <ol className="mt-3 flex flex-col gap-2" aria-labelledby={headingId}>
         {citations.map((citation) => {
           const open = openOrdinal === citation.ordinal;
           const titleId = `${headingId}-${citation.ordinal}`;
@@ -48,10 +48,11 @@ export function CitationFootnotes({
             <li key={citation.chunkId}>
               <button
                 type="button"
+                aria-label={`Citation ${citation.ordinal}`}
                 aria-expanded={open}
                 aria-controls={titleId}
                 onClick={() => onToggle(citation.ordinal)}
-                className="flex w-full items-baseline gap-2 rounded-md px-1 py-1 text-left text-xs leading-5 text-parchment-dim transition-colors hover:bg-gold/10 hover:text-parchment focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright"
+                className="flex w-full items-baseline gap-2.5 rounded-sm px-1.5 py-1.5 text-left text-sm leading-6 text-parchment-dim transition-colors hover:bg-gold/10 hover:text-parchment focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright"
               >
                 <span className="shrink-0 font-medium text-gold">
                   [{citation.ordinal}]
@@ -65,17 +66,17 @@ export function CitationFootnotes({
                   id={titleId}
                   role="region"
                   aria-label={citation.book}
-                  className="mt-2 rounded-lg border border-ink-edge bg-ink/50 px-3 py-3"
+                  className="manuscript corner-frame mt-2 px-4 py-4"
                 >
-                  <p className="font-display text-lg font-light text-parchment">
+                  <p className="font-display text-xl font-light leading-tight text-parchment">
                     {citation.book}
                   </p>
                   {citation.chapter ? (
-                    <p className="mt-0.5 text-[0.65rem] uppercase tracking-[0.16em] text-gold">
+                    <p className="mt-1 text-[0.62rem] uppercase tracking-[0.18em] text-gold">
                       {citation.chapter}
                     </p>
                   ) : null}
-                  <p className="mt-3 max-h-40 overflow-y-auto whitespace-pre-wrap text-sm leading-6 text-parchment-dim">
+                  <p className="mt-3 max-h-40 overflow-y-auto font-serif text-[0.95rem] leading-7 text-parchment-dim italic">
                     {citation.quote}
                   </p>
                 </div>

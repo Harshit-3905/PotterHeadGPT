@@ -1,25 +1,10 @@
-"use client";
-
-import type { CitationPayload } from "@/rag/types";
-
-export function Citation({
-  citation,
-  open,
-  onOpen,
-}: {
-  citation: CitationPayload;
-  open: boolean;
-  onOpen: () => void;
-}) {
+export function CitationMark({ ordinal }: { ordinal: number }) {
   return (
-    <button
-      type="button"
-      className="citation-mark mx-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-sm bg-gold/15 px-1 align-super text-[0.65rem] font-medium text-gold-bright transition-colors hover:bg-gold/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright"
-      aria-label={`Citation ${citation.ordinal}`}
-      aria-expanded={open}
-      onClick={onOpen}
+    <span
+      aria-hidden="true"
+      className="mx-0.5 inline-flex translate-y-[-0.08em] items-center bg-gold/15 px-1 py-px text-[0.8em] font-semibold leading-none text-gold-bright"
     >
-      [{citation.ordinal}]
-    </button>
+      [{ordinal}]
+    </span>
   );
 }
