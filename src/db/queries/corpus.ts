@@ -65,3 +65,12 @@ export async function updateDocument(
 export async function deleteAllDocuments(db: Database) {
   await db.delete(documents);
 }
+
+export async function hasIngestedDocuments(db: Database): Promise<boolean> {
+  const [document] = await db
+    .select({ id: documents.id })
+    .from(documents)
+    .limit(1);
+
+  return Boolean(document);
+}

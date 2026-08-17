@@ -4,14 +4,46 @@ import ChatPage from "@/app/chat/page";
 
 const auth = vi.fn();
 const redirect = vi.fn((destination: string) => {
-  // The real `redirect` throws to abort the render; tests rely on that to prove
-  // an unauthenticated visitor never receives the protected markup.
   throw new Error(`NEXT_REDIRECT:${destination}`);
 });
 
 vi.mock("@/auth/config", () => ({ auth: () => auth() }));
+vi.mock("@/auth/actions", () => ({
+  beginGoogleUpgrade: vi.fn(),
+  signOutToLogin: vi.fn(),
+}));
 vi.mock("next/navigation", () => ({
   redirect: (destination: string) => redirect(destination),
+  useRouter: () => ({ replace: vi.fn() }),
+}));
+vi.mock("@/chat/load-shell", () => ({
+  loadChatShell: async (session: {
+    user: {
+      id: string;
+      role: "user" | "admin";
+      isGuest: boolean;
+      name?: string | null;
+      email?: string | null;
+    };
+  }) => ({
+    session: {
+      id: session.user.id,
+      role: session.user.role,
+      isGuest: session.user.isGuest,
+      name: session.user.name ?? null,
+      email: session.user.email ?? null,
+    },
+    usage: {
+      limit: 5,
+      used: 0,
+      remaining: 5,
+      resetsAt: "2026-08-18T00:00:00.000Z",
+      unlimited: false,
+    },
+    conversations: [],
+    conversation: null,
+    hasCorpus: true,
+  }),
 }));
 
 const guestSession = {
@@ -57,6 +89,12 @@ describe("chat page", () => {
       screen.getByRole("heading", { level: 1, name: /potterheadgpt/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/guest session/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign in with google/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign out/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders the shell for a Google session", async () => {
@@ -67,5 +105,11 @@ describe("chat page", () => {
     expect(redirect).not.toHaveBeenCalled();
     expect(screen.getByText(/hermione granger/i)).toBeInTheDocument();
     expect(screen.queryByText(/guest session/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /sign in with google/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign out/i }),
+    ).toBeInTheDocument();
   });
 });

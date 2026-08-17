@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import Home from "@/app/page";
 
 describe("landing page", () => {
-  it("points its primary chat call to action at the login page", () => {
+  it("points its primary chat call to action at the chat page", () => {
     render(<Home />);
 
     expect(
       screen.getByRole("link", { name: /start a conversation/i }),
-    ).toHaveAttribute("href", "/login");
+    ).toHaveAttribute("href", "/chat");
   });
 
   it("names the product in its only top-level heading", () => {

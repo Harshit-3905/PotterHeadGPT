@@ -23,7 +23,7 @@ export default function Home() {
         </p>
 
         <Link
-          href="/login"
+          href="/chat"
           className="group animate-rise mt-12 inline-flex items-center gap-3 rounded-full bg-gold px-8 py-4 text-sm font-medium uppercase tracking-[0.18em] text-ink transition-colors duration-300 [animation-delay:300ms] hover:bg-gold-bright focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-bright"
         >
           Start a conversation

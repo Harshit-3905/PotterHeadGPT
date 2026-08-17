@@ -10,6 +10,7 @@
   --gold: #c9a86a;
   --gold-bright: #e8cd94;
   --gold-deep: #8a6d33;
+  --crimson: #b42318;
 }
 
 @theme inline {
@@ -21,6 +22,7 @@
   --color-gold: var(--gold);
   --color-gold-bright: var(--gold-bright);
   --color-gold-deep: var(--gold-deep);
+  --color-crimson: var(--crimson);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -89,4 +91,13 @@ body::after {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+.star-field {
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(232, 205, 148, 0.55), transparent 100%),
+    radial-gradient(1px 1px at 38% 42%, rgba(232, 205, 148, 0.35), transparent 100%),
+    radial-gradient(1px 1px at 71% 22%, rgba(232, 205, 148, 0.45), transparent 100%),
+    radial-gradient(1px 1px at 82% 68%, rgba(232, 205, 148, 0.3), transparent 100%),
+    radial-gradient(1px 1px at 24% 78%, rgba(232, 205, 148, 0.4), transparent 100%);
 }
