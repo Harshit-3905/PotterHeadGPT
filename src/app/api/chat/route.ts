@@ -14,12 +14,12 @@ import {
   readJsonBody,
   safeErrorResponse,
 } from "@/lib/http";
-import { createGroundedAnswerGenerator } from "@/rag/pipeline";
+import { resolveGroundedAnswerGenerator } from "@/rag/provider";
 import { releaseMessage, reserveMessage } from "@/usage/daily-limit";
 
 export const dynamic = "force-dynamic";
 
-const generate = createGroundedAnswerGenerator({
+const generate = resolveGroundedAnswerGenerator({
   openaiApiKey: env.OPENAI_API_KEY,
   qdrantUrl: env.QDRANT_URL,
   qdrantApiKey: env.QDRANT_API_KEY,

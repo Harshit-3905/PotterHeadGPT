@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth/config";
 import { LoginActions } from "@/components/auth/login-actions";
 import { Constellation } from "@/components/landing/constellation";
+import { isE2eAuthEnabled } from "@/auth/e2e";
 
 export const metadata: Metadata = {
   title: "Sign in \u00b7 PotterHeadGPT",
@@ -37,7 +38,7 @@ export default async function LoginPage() {
         <div aria-hidden="true" className="gilt-rule mx-auto mt-9 w-16" />
 
         <div className="mt-9">
-          <LoginActions />
+          <LoginActions showE2eAdmin={isE2eAuthEnabled()} />
         </div>
 
         <p className="mt-8 text-center text-sm leading-6 text-parchment-dim">

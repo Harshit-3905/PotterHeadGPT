@@ -3,13 +3,14 @@
 import { signIn } from "next-auth/react";
 import { useRef, useState } from "react";
 
-type Provider = "guest" | "google";
+type Provider = "guest" | "google" | "e2e-admin";
 
 export type LoginNavigate = (url: string) => void;
 
 const PENDING_MESSAGE: Record<Provider, string> = {
   guest: "Opening a guest session\u2026",
   google: "Handing you to Google\u2026",
+  "e2e-admin": "Opening the admin desk\u2026",
 };
 
 const FAILURE_MESSAGE = "That sign-in did not go through. Please try again.";
@@ -23,8 +24,10 @@ function defaultNavigate(url: string) {
 
 export function LoginActions({
   navigate = defaultNavigate,
+  showE2eAdmin = false,
 }: {
   navigate?: LoginNavigate;
+  showE2eAdmin?: boolean;
 }) {
   const [pending, setPending] = useState<Provider | null>(null);
   const [failed, setFailed] = useState(false);
@@ -87,6 +90,18 @@ export function LoginActions({
       >
         Continue with Google
       </button>
+
+      {showE2eAdmin ? (
+        <button
+          type="button"
+          onClick={() => void start("e2e-admin")}
+          disabled={pending !== null}
+          aria-busy={pending === "e2e-admin"}
+          className={`${BUTTON_BASE} border border-crimson/60 text-parchment hover:border-crimson hover:bg-crimson/10`}
+        >
+          Continue as E2E Admin
+        </button>
+      ) : null}
 
       <p
         role="status"
