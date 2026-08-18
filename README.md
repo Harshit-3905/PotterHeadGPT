@@ -2,7 +2,7 @@
 
 **A multi-user cited RAG chat over the Harry Potter books — every answer links to the passages it was drawn from, or refuses honestly when the text does not support an answer.**
 
-**Live demo:** [potterheadgpt.vercel.app](https://potterheadgpt.vercel.app)
+**Live demo:** [potterhead-gpt.harshitjoshi.dev](https://potterhead-gpt.harshitjoshi.dev)
 
 ---
 
@@ -18,7 +18,7 @@ The landing page shows the cited-answer UX: inline `[1]` footnotes, hover excerp
 
 - **Cited RAG pipeline** — LangChain.js retrieval → numbered-passage prompt → streamed `gpt-4o-mini` answer with validated `[n]` markers
 - **Dual-store architecture** — Postgres (Neon) for auth, chat, and quotas; Qdrant for chunk vectors and passage text
-- **Grounded refusal** — similarity threshold + citation validation; exact copy: *“I couldn't find this in the books.”*
+- **Grounded refusal** — similarity threshold + citation validation; exact copy: _“I couldn't find this in the books.”_
 - **Multi-user auth** — Auth.js with Google OAuth, persistent guest sessions (JWT), signed handoff for history merge
 - **Atomic daily quotas** — conditional Postgres upsert enforces 5 messages/day for all non-admins; admin bypass via DB role
 - **Idempotent ingest CLI** — checksum-based skip/replace for `.txt` / `.epub` / `.pdf`; no copyrighted corpus in git
@@ -50,6 +50,8 @@ scripts/ingest.ts  →  prepare → split → embed → upsert Qdrant + document
 
 Deeper design rationale: [docs/architecture.md](./docs/architecture.md)
 
+New to the codebase? Start at [docs/codebase-guide.md](./docs/codebase-guide.md) — per-module docs in [docs/modules/](./docs/modules/)
+
 ---
 
 ## RAG flow
@@ -68,11 +70,11 @@ Chunking: recursive character splitter, ~800–1200 tokens with ~150–200 overl
 
 ## Users, limits, and guest merge
 
-| Role | Daily limit | History |
-|------|-------------|---------|
-| **Guest** | 5 messages / UTC day | Persists in browser session; merge on sign-in |
-| **Signed-in (Google)** | 5 messages / UTC day | Full history across devices |
-| **Admin** (`users.role = 'admin'`) | Unlimited | Same as signed-in |
+| Role                               | Daily limit          | History                                       |
+| ---------------------------------- | -------------------- | --------------------------------------------- |
+| **Guest**                          | 5 messages / UTC day | Persists in browser session; merge on sign-in |
+| **Signed-in (Google)**             | 5 messages / UTC day | Full history across devices                   |
+| **Admin** (`users.role = 'admin'`) | Unlimited            | Same as signed-in                             |
 
 Signing in does **not** raise the quota — it unlocks account continuity.
 
@@ -95,15 +97,15 @@ pnpm db:migrate
 pnpm dev               # http://localhost:3000
 ```
 
-| Variable | Purpose |
-|----------|---------|
-| `DATABASE_URL` | Postgres connection |
-| `QDRANT_URL` / `QDRANT_API_KEY` / `QDRANT_COLLECTION` | Vector store |
-| `AUTH_SECRET` | Auth.js + guest handoff signing (`openssl rand -base64 32`) |
-| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google OAuth |
-| `OPENAI_API_KEY` | Embeddings + chat |
-| `DAILY_MESSAGE_LIMIT` | Default `5` |
-| `RAG_TOP_K` / `RAG_SCORE_THRESHOLD` | Retrieval tuning |
+| Variable                                              | Purpose                                                     |
+| ----------------------------------------------------- | ----------------------------------------------------------- |
+| `DATABASE_URL`                                        | Postgres connection                                         |
+| `QDRANT_URL` / `QDRANT_API_KEY` / `QDRANT_COLLECTION` | Vector store                                                |
+| `AUTH_SECRET`                                         | Auth.js + guest handoff signing (`openssl rand -base64 32`) |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`               | Google OAuth                                                |
+| `OPENAI_API_KEY`                                      | Embeddings + chat                                           |
+| `DAILY_MESSAGE_LIMIT`                                 | Default `5`                                                 |
+| `RAG_TOP_K` / `RAG_SCORE_THRESHOLD`                   | Retrieval tuning                                            |
 
 ### Prepare and ingest books
 
@@ -136,14 +138,14 @@ See [evals/README.md](./evals/README.md) for golden-set schema and metrics defin
 
 Measured on **2026-08-18** against a 13-case private golden set (`evals/golden.local.json`) run on the ingested synthetic fixture corpus (`tests/fixtures/prepared`). Re-run locally after ingest; do not treat these as production Harry Potter corpus scores unless you author your own `golden.local.json` against your ingested books.
 
-| Metric | Passed | Total | Rate |
-|---|---:|---:|---:|
-| Retrieval hit | 9 | 10 | 90.0% |
-| Citation presence | 9 | 10 | 90.0% |
-| Refusal accuracy | 12 | 13 | 92.3% |
-| Aggregate pass | 12 | 13 | 92.3% |
+| Metric            | Passed | Total |  Rate |
+| ----------------- | -----: | ----: | ----: |
+| Retrieval hit     |      9 |    10 | 90.0% |
+| Citation presence |      9 |    10 | 90.0% |
+| Refusal accuracy  |     12 |    13 | 92.3% |
+| Aggregate pass    |     12 |    13 | 92.3% |
 
-One expected miss: *“What does the moonstone key open?”* — the answer term (`archive`) lives in a separate chunk from the key-location passage, so retrieval does not always surface it in top-k.
+One expected miss: _“What does the moonstone key open?”_ — the answer term (`archive`) lives in a separate chunk from the key-location passage, so retrieval does not always surface it in top-k.
 
 ```bash
 pnpm eval -- --dataset evals/golden.local.json | tee eval-results.txt
@@ -170,13 +172,13 @@ pnpm eval -- --dataset evals/golden.local.json | tee eval-results.txt
 
 ## Trade-offs and future work
 
-| Choice | Rationale | Cost |
-|--------|-----------|------|
-| Next.js monolith | One deploy, easy portfolio review | Less isolation than split services |
-| Qdrant over pgvector | Dedicated vector indexing, clean re-ingest | Extra managed service |
-| Shared 5/day quota for guests + users | Abuse control without sign-in farming | Sign-in is not a quota upgrade |
-| Similarity threshold refusal | Simple, effective hallucination guard | May refuse borderline questions |
-| JWT guest sessions | Required for Credentials provider | No server-side session revocation for guests |
+| Choice                                | Rationale                                  | Cost                                         |
+| ------------------------------------- | ------------------------------------------ | -------------------------------------------- |
+| Next.js monolith                      | One deploy, easy portfolio review          | Less isolation than split services           |
+| Qdrant over pgvector                  | Dedicated vector indexing, clean re-ingest | Extra managed service                        |
+| Shared 5/day quota for guests + users | Abuse control without sign-in farming      | Sign-in is not a quota upgrade               |
+| Similarity threshold refusal          | Simple, effective hallucination guard      | May refuse borderline questions              |
+| JWT guest sessions                    | Required for Credentials provider          | No server-side session revocation for guests |
 
 **Deferred:** chapter/book filters · admin upload UI · hybrid BM25 + vector search · reranking · LangGraph multi-hop · additional OAuth providers
 

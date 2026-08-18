@@ -2,6 +2,8 @@
 
 Design notes for PotterHeadGPT — why the system is shaped the way it is.
 
+> **New to the codebase?** See [codebase-guide.md](./codebase-guide.md) (index + flows) and [modules/](./modules/) for per-component docs and [interview Q&A](./modules/interview-questions.md).
+
 ## Monolith over microservices
 
 PotterHeadGPT is a single Next.js App Router application: UI, Auth.js, API routes, Drizzle queries, retrieval, and generation all live in one deployable unit on Vercel.

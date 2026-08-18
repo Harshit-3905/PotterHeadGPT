@@ -52,6 +52,3 @@ books/*
 # private eval datasets
 evals/*.local.json
 eval-results.txt
-
-# agent planning docs (not portfolio-facing)
-/docs/superpowers
