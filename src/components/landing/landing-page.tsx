@@ -24,7 +24,7 @@ const STEPS = [
 
 const STACK = [
   "Next.js",
-  "LangChain.js",
+  "LangChain",
   "Qdrant",
   "Auth.js",
   "Postgres",
