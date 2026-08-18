@@ -178,15 +178,16 @@ describe("toChatHttpResponse", () => {
     const response = toChatHttpResponse({
       status: 429,
       body: {
-        error: "Daily message limit reached",
+        code: "daily_limit_reached",
         usage: success.body.usage,
       },
     });
 
     expect(response.status).toBe(429);
     expect(response.headers.get("content-type")).toMatch(/application\/json/);
+    expect(response.headers.get("cache-control")).toBe("no-store");
     await expect(response.json()).resolves.toEqual({
-      error: "Daily message limit reached",
+      code: "daily_limit_reached",
       usage: success.body.usage,
     });
   });

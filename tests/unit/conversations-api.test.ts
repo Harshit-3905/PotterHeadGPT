@@ -73,7 +73,7 @@ describe("handleGetConversation", () => {
       handleGetConversation(session, CONVERSATION_ID, { getConversation }),
     ).resolves.toEqual({
       status: 404,
-      body: { error: "Conversation not found" },
+      body: { code: "conversation_not_found" },
     });
     expect(getConversation).toHaveBeenCalledWith(USER_ID, CONVERSATION_ID);
   });

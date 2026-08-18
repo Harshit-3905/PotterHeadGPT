@@ -4,6 +4,7 @@ import { auth } from "@/auth/config";
 import { GUEST_HANDOFF_COOKIE } from "@/auth/constants";
 import { verifyGuestHandoffToken } from "@/auth/guest-handoff";
 import { mergeGuestIntoUser } from "@/auth/merge-guest";
+import { applySecurityHeaders } from "@/lib/http";
 
 function redirectAndClearHandoff(
   request: NextRequest,
@@ -11,6 +12,7 @@ function redirectAndClearHandoff(
 ): NextResponse {
   const response = NextResponse.redirect(new URL(destination, request.url));
   response.cookies.delete(GUEST_HANDOFF_COOKIE);
+  applySecurityHeaders(response);
 
   return response;
 }

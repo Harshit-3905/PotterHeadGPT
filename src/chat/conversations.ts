@@ -1,8 +1,7 @@
-import { z } from "zod";
 import type { ConversationSummary } from "@/db/queries/conversations";
+import { conversationIdSchema } from "@/db/queries/conversations";
 import type { ConversationWithMessages } from "@/db/queries/messages";
-
-const conversationIdSchema = z.uuid();
+import type { ApiErrorCode } from "@/lib/http";
 
 export type SessionUser = {
   user: {
@@ -11,12 +10,13 @@ export type SessionUser = {
 } | null;
 
 export type ListConversationsResult =
-  | { status: 401; body: { error: string } }
+  | { status: 401; body: { code: ApiErrorCode } }
   | { status: 200; body: { conversations: ConversationSummary[] } };
 
 export type GetConversationResult =
-  | { status: 401; body: { error: string } }
-  | { status: 404; body: { error: string } }
+  | { status: 401; body: { code: ApiErrorCode } }
+  | { status: 400; body: { code: ApiErrorCode } }
+  | { status: 404; body: { code: ApiErrorCode } }
   | { status: 200; body: ConversationWithMessages };
 
 export async function handleListConversations(
@@ -26,7 +26,7 @@ export async function handleListConversations(
   },
 ): Promise<ListConversationsResult> {
   if (!session?.user.id) {
-    return { status: 401, body: { error: "Unauthorized" } };
+    return { status: 401, body: { code: "unauthorized" } };
   }
 
   const conversations = await deps.listConversations(session.user.id);
@@ -44,11 +44,11 @@ export async function handleGetConversation(
   },
 ): Promise<GetConversationResult> {
   if (!session?.user.id) {
-    return { status: 401, body: { error: "Unauthorized" } };
+    return { status: 401, body: { code: "unauthorized" } };
   }
 
   if (!conversationIdSchema.safeParse(conversationId).success) {
-    return { status: 404, body: { error: "Conversation not found" } };
+    return { status: 400, body: { code: "invalid_request" } };
   }
 
   const conversation = await deps.getConversation(
@@ -56,7 +56,7 @@ export async function handleGetConversation(
     conversationId,
   );
   if (!conversation) {
-    return { status: 404, body: { error: "Conversation not found" } };
+    return { status: 404, body: { code: "conversation_not_found" } };
   }
 
   return { status: 200, body: conversation };

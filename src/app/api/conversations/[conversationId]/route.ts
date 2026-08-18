@@ -1,19 +1,50 @@
-import { NextResponse } from "next/server";
 import { auth } from "@/auth/config";
 import { handleGetConversation } from "@/chat/conversations";
 import { db } from "@/db";
 import { getConversationWithMessages } from "@/db/queries/messages";
+import {
+  createRequestId,
+  logApiRequest,
+  safeErrorResponse,
+  safeJsonResponse,
+} from "@/lib/http";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(
   _request: Request,
   context: { params: Promise<{ conversationId: string }> },
 ) {
-  const session = await auth();
-  const { conversationId } = await context.params;
-  const result = await handleGetConversation(session, conversationId, {
-    getConversation: (userId, id) =>
-      getConversationWithMessages(db, userId, id),
-  });
+  const requestId = createRequestId();
+  const started = Date.now();
+  let status = 500;
+  let errorCode: Parameters<typeof logApiRequest>[0]["errorCode"];
+  let userId: string | undefined;
 
-  return NextResponse.json(result.body, { status: result.status });
+  try {
+    const session = await auth();
+    userId = session?.user?.id;
+    const { conversationId } = await context.params;
+    const result = await handleGetConversation(session, conversationId, {
+      getConversation: (ownerId, id) =>
+        getConversationWithMessages(db, ownerId, id),
+    });
+
+    status = result.status;
+    if (result.status !== 200) {
+      errorCode = result.body.code;
+      return safeErrorResponse(result.body.code, result.status);
+    }
+
+    return safeJsonResponse(result.body);
+  } finally {
+    logApiRequest({
+      requestId,
+      route: "/api/conversations/[conversationId]",
+      userId,
+      status,
+      latencyMs: Date.now() - started,
+      errorCode,
+    });
+  }
 }

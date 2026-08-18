@@ -2,6 +2,7 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { UserClaims } from "@/auth/claims";
+import { roleFromDatabase } from "@/auth/roles";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 
@@ -27,7 +28,12 @@ export async function findUserClaims(
     .where(eq(users.id, userId))
     .limit(1);
 
-  return user ?? null;
+  return user
+    ? {
+        role: roleFromDatabase(user.role),
+        isGuest: user.isGuest,
+      }
+    : null;
 }
 
 export async function createGuestUser(): Promise<GuestUser> {
@@ -40,5 +46,5 @@ export async function createGuestUser(): Promise<GuestUser> {
     throw new Error("Failed to create a guest user.");
   }
 
-  return { id: guest.id, role: guest.role, isGuest: true };
+  return { id: guest.id, role: roleFromDatabase(guest.role), isGuest: true };
 }

@@ -206,7 +206,7 @@ describe("handleChatRequest", () => {
     ).resolves.toEqual({
       status: 429,
       body: {
-        error: "Daily message limit reached",
+        code: "daily_limit_reached",
         usage: denied,
       },
     });

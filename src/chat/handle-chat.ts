@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { UserRole } from "@/auth/roles";
 import { HISTORY_TURN_LIMIT } from "@/db/queries/messages";
+import type { ApiErrorCode } from "@/lib/http";
 import type { ChatTurn, GroundedAnswer } from "@/rag/types";
 import type { UsageStatus } from "@/usage/types";
 
@@ -56,12 +57,12 @@ export type ChatDeps = {
 };
 
 export type ChatResponse =
-  | { status: 401; body: { error: string } }
-  | { status: 400; body: { error: string } }
-  | { status: 404; body: { error: string } }
-  | { status: 429; body: { error: string; usage: UsageStatus } }
-  | { status: 502; body: { error: string } }
-  | { status: 500; body: { error: string } }
+  | { status: 401; body: { code: ApiErrorCode } }
+  | { status: 400; body: { code: ApiErrorCode } }
+  | { status: 404; body: { code: ApiErrorCode } }
+  | { status: 429; body: { code: ApiErrorCode; usage: UsageStatus } }
+  | { status: 502; body: { code: ApiErrorCode } }
+  | { status: 500; body: { code: ApiErrorCode } }
   | {
       status: 200;
       body: {
@@ -93,12 +94,18 @@ export async function prepareChatRequest(
   | { ok: false; response: Exclude<ChatResponse, { status: 200 }> }
 > {
   if (!session?.user.id) {
-    return { ok: false, response: { status: 401, body: { error: "Unauthorized" } } };
+    return {
+      ok: false,
+      response: { status: 401, body: { code: "unauthorized" } },
+    };
   }
 
   const parsed = chatRequestSchema.safeParse(body);
   if (!parsed.success) {
-    return { ok: false, response: { status: 400, body: { error: "Invalid request" } } };
+    return {
+      ok: false,
+      response: { status: 400, body: { code: "invalid_request" } },
+    };
   }
 
   const { message, conversationId: existingId } = parsed.data;
@@ -110,7 +117,10 @@ export async function prepareChatRequest(
     if (!owned) {
       return {
         ok: false,
-        response: { status: 404, body: { error: "Conversation not found" } },
+        response: {
+          status: 404,
+          body: { code: "conversation_not_found" },
+        },
       };
     }
   }
@@ -122,7 +132,7 @@ export async function prepareChatRequest(
       response: {
         status: 429,
         body: {
-          error: "Daily message limit reached",
+          code: "daily_limit_reached",
           usage: reservation.status,
         },
       },
@@ -154,7 +164,7 @@ export async function prepareChatRequest(
     await deps.releaseMessage(userId, role);
     return {
       ok: false,
-      response: { status: 500, body: { error: "Something went wrong" } },
+      response: { status: 500, body: { code: "internal_error" } },
     };
   }
 }
@@ -202,7 +212,7 @@ export async function handleChatRequest(
   } catch {
     await deps.releaseMessage(userId, role);
     return phase === "generate"
-      ? { status: 502, body: { error: "Generation failed" } }
-      : { status: 500, body: { error: "Something went wrong" } };
+      ? { status: 502, body: { code: "generation_failed" } }
+      : { status: 500, body: { code: "internal_error" } };
   }
 }

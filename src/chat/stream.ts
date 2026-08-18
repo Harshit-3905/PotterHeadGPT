@@ -1,5 +1,9 @@
 import type { ChatDeps, ChatResponse, PreparedChat } from "./handle-chat";
 import {
+  applySecurityHeaders,
+  safeErrorResponse,
+} from "@/lib/http";
+import {
   encodeEvent,
   type ChatStreamEvent,
 } from "@/rag/stream-events";
@@ -64,7 +68,9 @@ async function* eventsFromArray(
 
 export function toChatHttpResponse(result: ChatResponse): Response {
   if (result.status !== 200) {
-    return Response.json(result.body, { status: result.status });
+    return safeErrorResponse(result.body.code, result.status, {
+      ...(result.status === 429 ? { usage: result.body.usage } : {}),
+    });
   }
 
   const stream = new ReadableStream<Uint8Array>({
@@ -78,14 +84,17 @@ export function toChatHttpResponse(result: ChatResponse): Response {
     },
   });
 
-  return new Response(stream, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/x-ndjson; charset=utf-8",
-      "Cache-Control": "no-cache, no-transform",
-      "X-Accel-Buffering": "no",
-    },
-  });
+  return applySecurityHeaders(
+    new Response(stream, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/x-ndjson; charset=utf-8",
+        "Cache-Control": "no-store",
+        "X-Accel-Buffering": "no",
+        "X-Content-Type-Options": "nosniff",
+      },
+    }),
+  );
 }
 
 export function toLiveChatResponse(
@@ -148,12 +157,15 @@ export function toLiveChatResponse(
     },
   });
 
-  return new Response(stream, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/x-ndjson; charset=utf-8",
-      "Cache-Control": "no-cache, no-transform",
-      "X-Accel-Buffering": "no",
-    },
-  });
+  return applySecurityHeaders(
+    new Response(stream, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/x-ndjson; charset=utf-8",
+        "Cache-Control": "no-store",
+        "X-Accel-Buffering": "no",
+        "X-Content-Type-Options": "nosniff",
+      },
+    }),
+  );
 }

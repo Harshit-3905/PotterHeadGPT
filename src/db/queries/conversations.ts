@@ -1,10 +1,13 @@
 import { and, desc, eq } from "drizzle-orm";
+import { z } from "zod";
 import { conversationTitle } from "@/chat/title";
 import type { Database } from "../client";
 import {
   conversations,
   type Conversation,
 } from "../schema/chat";
+
+export const conversationIdSchema = z.uuid();
 
 export type ConversationSummary = {
   id: string;
@@ -38,6 +41,10 @@ export async function findOwnedConversation(
   userId: string,
   conversationId: string,
 ): Promise<{ id: string } | null> {
+  if (!conversationIdSchema.safeParse(conversationId).success) {
+    return null;
+  }
+
   const [conversation] = await db
     .select({ id: conversations.id })
     .from(conversations)

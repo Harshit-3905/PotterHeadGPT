@@ -7,6 +7,22 @@ import type { userRole } from "@/db/schema/auth";
  */
 export type UserRole = (typeof userRole.enumValues)[number];
 
+export const DEFAULT_USER_ROLE: UserRole = "user";
+
+/** Maps a database role column to a trusted session role. */
+export function roleFromDatabase(value: unknown): UserRole {
+  return value === "admin" ? "admin" : DEFAULT_USER_ROLE;
+}
+
+/**
+ * JWT/OAuth payloads may carry a client-supplied `role`. That claim is ignored
+ * until {@link roleFromDatabase} validates the persisted row on every refresh.
+ */
+export function ignoreClientRoleClaim(_claim: unknown): UserRole {
+  void _claim;
+  return DEFAULT_USER_ROLE;
+}
+
 export function isAdmin(role: UserRole): boolean {
   return role === "admin";
 }

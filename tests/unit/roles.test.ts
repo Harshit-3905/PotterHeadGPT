@@ -1,6 +1,11 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { isAdmin, isUserRole } from "@/auth/roles";
+import {
+  ignoreClientRoleClaim,
+  isAdmin,
+  isUserRole,
+  roleFromDatabase,
+} from "@/auth/roles";
 
 describe("isAdmin", () => {
   it("grants admin privileges to the admin role", () => {
@@ -22,5 +27,17 @@ describe("isUserRole", () => {
     for (const value of ["root", "Admin", "", null, undefined, 1, true, {}]) {
       expect(isUserRole(value)).toBe(false);
     }
+  });
+});
+
+describe("roleFromDatabase", () => {
+  it("promotes only persisted admin rows", () => {
+    expect(roleFromDatabase("admin")).toBe("admin");
+    expect(roleFromDatabase("user")).toBe("user");
+    expect(roleFromDatabase("root")).toBe("user");
+  });
+
+  it("drops client role claims", () => {
+    expect(ignoreClientRoleClaim("admin")).toBe("user");
   });
 });
