@@ -6,14 +6,6 @@
 
 ---
 
-## Screenshot
-
-The landing page shows the cited-answer UX: inline `[1]` footnotes, hover excerpts, and a grounded refusal when retrieval confidence is too low.
-
-![PotterHeadGPT landing page with cited answer specimen](./public/social-card.png)
-
----
-
 ## Technical highlights
 
 - **Cited RAG pipeline** — LangChain.js retrieval → numbered-passage prompt → streamed `gpt-4o-mini` answer with validated `[n]` markers
@@ -84,56 +76,6 @@ Signing in does **not** raise the quota — it unlocks account continuity.
 
 ---
 
-## Local setup
-
-**Requirements:** Node.js 20.9+, pnpm, Postgres, Qdrant (Docker or Cloud), OpenAI API key, Google OAuth credentials.
-
-```bash
-git clone https://github.com/<you>/potterhead-gpt.git
-cd potterhead-gpt
-pnpm install --frozen-lockfile
-cp .env.example .env   # fill every variable
-pnpm db:migrate
-pnpm dev               # http://localhost:3000
-```
-
-| Variable                                              | Purpose                                                     |
-| ----------------------------------------------------- | ----------------------------------------------------------- |
-| `DATABASE_URL`                                        | Postgres connection                                         |
-| `QDRANT_URL` / `QDRANT_API_KEY` / `QDRANT_COLLECTION` | Vector store                                                |
-| `AUTH_SECRET`                                         | Auth.js + guest handoff signing (`openssl rand -base64 32`) |
-| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`               | Google OAuth                                                |
-| `OPENAI_API_KEY`                                      | Embeddings + chat                                           |
-| `DAILY_MESSAGE_LIMIT`                                 | Default `5`                                                 |
-| `RAG_TOP_K` / `RAG_SCORE_THRESHOLD`                   | Retrieval tuning                                            |
-
-### Prepare and ingest books
-
-Book files are **not** in this repository. Use legally obtained `.txt`, `.epub`, or `.pdf` files.
-
-```bash
-# 1. Place raw files under books/raw/ (gitignored)
-pnpm prepare-books -- --path books/raw --out books/prepared
-
-# 2. Ingest into Qdrant + documents registry
-pnpm ingest -- --path books/prepared
-
-# Smoke test with the committed synthetic fixture:
-pnpm ingest -- --path tests/fixtures/prepared
-```
-
-### Verify quality
-
-```bash
-pnpm verify          # lint + typecheck + unit tests + build
-pnpm test:e2e        # Playwright smoke tests
-pnpm eval -- --dataset evals/golden.local.json   # private golden set (gitignored)
-```
-
-See [evals/README.md](./evals/README.md) for golden-set schema and metrics definitions.
-
----
-
 ## Evaluation results
 
 Measured on **2026-08-18** against a 13-case private golden set (`evals/golden.local.json`) run on the ingested synthetic fixture corpus (`tests/fixtures/prepared`). Re-run locally after ingest; do not treat these as production Harry Potter corpus scores unless you author your own `golden.local.json` against your ingested books.
@@ -179,18 +121,6 @@ pnpm eval -- --dataset evals/golden.local.json | tee eval-results.txt
 | Shared 5/day quota for guests + users | Abuse control without sign-in farming      | Sign-in is not a quota upgrade               |
 | Similarity threshold refusal          | Simple, effective hallucination guard      | May refuse borderline questions              |
 | JWT guest sessions                    | Required for Credentials provider          | No server-side session revocation for guests |
-
-**Deferred:** chapter/book filters · admin upload UI · hybrid BM25 + vector search · reranking · LangGraph multi-hop · additional OAuth providers
-
----
-
-## Resume bullets
-
-- Built and deployed a multi-user cited RAG application using Next.js, LangChain.js, Auth.js, OpenAI, and Postgres/Qdrant.
-- Implemented grounded refusal, source-linked passage citations, atomic daily quotas, admin bypass, and secure guest-to-Google history migration.
-- Golden-set eval (13 cases, synthetic fixture corpus): **90% retrieval hit**, **90% citation compliance**, **92% refusal accuracy**.
-
----
 
 ## License
 
