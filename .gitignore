@@ -47,4 +47,10 @@ next-env.d.ts
 # book corpus (local only)
 books/*
 !books/.gitkeep
-/docs
+
+# private eval datasets
+evals/*.local.json
+eval-results.txt
+
+# agent planning docs (not portfolio-facing)
+/docs/superpowers

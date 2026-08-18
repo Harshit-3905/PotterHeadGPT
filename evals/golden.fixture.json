@@ -1,0 +1,23 @@
+[
+  {
+    "id": "key-location",
+    "question": "Where is the moonstone key kept?",
+    "expectedTerms": ["eastern observatory"],
+    "expectCitation": true,
+    "expectRefusal": false
+  },
+  {
+    "id": "key-use",
+    "question": "What does the moonstone key open?",
+    "expectedTerms": ["archive"],
+    "expectCitation": true,
+    "expectRefusal": false
+  },
+  {
+    "id": "unsupported",
+    "question": "Who built the western tower?",
+    "expectedTerms": [],
+    "expectCitation": false,
+    "expectRefusal": true
+  }
+]
